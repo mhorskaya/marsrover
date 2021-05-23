@@ -4,7 +4,7 @@
     {
         public void Execute(Rover rover)
         {
-            rover.Turn(Direction.Right);
+            rover.TurnRight();
         }
     }
 }

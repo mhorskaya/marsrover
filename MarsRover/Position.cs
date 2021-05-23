@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections.Generic;
 
 namespace MarsRover
 {
@@ -13,14 +13,20 @@ namespace MarsRover
             Y = y;
         }
 
-        public Position GetAdjacentPosition(Orientation orientation) => orientation switch
+        private static readonly Dictionary<Orientation, Position> TransformMap = new()
         {
-            Orientation.North => new Position(X, Y + 1),
-            Orientation.East => new Position(X + 1, Y),
-            Orientation.South => new Position(X, Y - 1),
-            Orientation.West => new Position(X - 1, Y),
-            _ => throw new ArgumentOutOfRangeException(nameof(orientation), orientation, "Unknown orientation")
+            [Orientation.North] = new Position(0, 1),
+            [Orientation.East] = new Position(1, 0),
+            [Orientation.South] = new Position(0, -1),
+            [Orientation.West] = new Position(-1, 0)
         };
+
+        public Position GetAdjacentPosition(Orientation orientation)
+        {
+            return this + TransformMap[orientation];
+        }
+
+        public static Position operator +(Position a, Position b) => new(a.X + b.X, a.Y + b.Y);
 
         public override string ToString() => $"({X}, {Y})";
     }

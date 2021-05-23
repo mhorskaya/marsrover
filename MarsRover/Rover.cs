@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace MarsRover
@@ -16,7 +17,31 @@ namespace MarsRover
             _orientation = orientation;
         }
 
-        public void RunCommands(string commands)
+        private readonly Dictionary<char, ICommand> _commands = new()
+        {
+            ['L'] = new TurnLeftCommand(),
+            ['R'] = new TurnRightCommand(),
+            ['M'] = new MoveCommand()
+        };
+
+        private readonly Dictionary<Orientation, Orientation> _leftOrientationMap = new()
+        {
+            [Orientation.North] = Orientation.West,
+            [Orientation.West] = Orientation.South,
+            [Orientation.South] = Orientation.East,
+            [Orientation.East] = Orientation.North
+        };
+
+        private readonly Dictionary<Orientation, Orientation> _rightOrientationMap = new()
+        {
+            [Orientation.North] = Orientation.East,
+            [Orientation.East] = Orientation.South,
+            [Orientation.South] = Orientation.West,
+            [Orientation.West] = Orientation.North
+        };
+
+
+        public void Run(string commands)
         {
             foreach (var command in commands.Select(GetCommand))
             {
@@ -24,28 +49,24 @@ namespace MarsRover
             }
         }
 
-        private static ICommand GetCommand(char command) => command switch
+        private ICommand GetCommand(char commandChar)
         {
-            'L' => new TurnLeftCommand(),
-            'R' => new TurnRightCommand(),
-            'M' => new MoveCommand(),
-            _ => throw new ArgumentOutOfRangeException(nameof(command), command, "Unknown command")
-        };
-
-        public void Turn(Direction direction)
-        {
-            _orientation = (_orientation, direction) switch
+            if (_commands.TryGetValue(commandChar, out var command))
             {
-                (Orientation.North, Direction.Left) => Orientation.West,
-                (Orientation.West, Direction.Left) => Orientation.South,
-                (Orientation.South, Direction.Left) => Orientation.East,
-                (Orientation.East, Direction.Left) => Orientation.North,
-                (Orientation.North, Direction.Right) => Orientation.East,
-                (Orientation.East, Direction.Right) => Orientation.South,
-                (Orientation.South, Direction.Right) => Orientation.West,
-                (Orientation.West, Direction.Right) => Orientation.North,
-                _ => throw new ArgumentOutOfRangeException(nameof(direction), direction, "Unknown direction")
-            };
+                return command;
+            }
+
+            throw new ArgumentOutOfRangeException(nameof(commandChar), commandChar, "Unrecognized command character");
+        }
+
+        public void TurnLeft()
+        {
+            _orientation = _leftOrientationMap[_orientation];
+        }
+
+        public void TurnRight()
+        {
+            _orientation = _rightOrientationMap[_orientation];
         }
 
         public void Move()

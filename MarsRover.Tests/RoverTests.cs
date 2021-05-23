@@ -22,7 +22,7 @@ namespace MarsRover.Tests
             var orientation = (Orientation) o;
             var rover = new Rover(plateau, position, orientation);
 
-            rover.RunCommands(commands);
+            rover.Run(commands);
 
             Assert.Equal(output, rover.GetLocationInfo());
         }
@@ -30,12 +30,23 @@ namespace MarsRover.Tests
         [Fact]
         public void Rover_CannotLeavePlateau()
         {
-            var plateau = new Plateau(5, 5);
-            var position = new Position(0, 0);
-            var orientation = Orientation.West;
-            var rover = new Rover(plateau, position, orientation);
-
+            var rover = InitRover(0, 0, 'W');
             Assert.Throws<IndexOutOfRangeException>(() => rover.Move());
+        }
+
+        [Fact]
+        public void Rover_CannotRunUnrecognizedCommand()
+        {
+            var rover = InitRover(0, 0, 'N');
+            Assert.Throws<ArgumentOutOfRangeException>(() => rover.Run("?"));
+        }
+
+        private static Rover InitRover(int x, int y, char o)
+        {
+            var plateau = new Plateau(5, 5);
+            var position = new Position(x, y);
+            var orientation = (Orientation) o;
+            return new Rover(plateau, position, orientation);
         }
     }
 }
